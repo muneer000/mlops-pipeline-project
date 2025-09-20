@@ -1,4 +1,4 @@
-# main.yml - Our first CI/CD workflow file
+# main.yml (Version 2 - with Training and Logging)
 name: Python CI/CD Pipeline
 
 on:
@@ -6,6 +6,7 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # Job 1: Build the Docker image (this remains the same)
   build:
     runs-on: ubuntu-latest
     steps:
@@ -18,5 +19,35 @@ jobs:
       - name: Build Docker image
         run: docker build -t iris-predictor-ci .
 
-      - name: Check Docker images
-        run: docker images
+  # Job 2: Train the model and log results to MLflow
+  train-and-log:
+    # This job will only start after the 'build' job has finished successfully.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      # Step 3: Install all necessary libraries
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 4: Run the training script
+      # This will create the 'mlruns' directory inside the runner.
+      - name: Train model and log to MLflow
+        run: python train.py
+
+      # Step 5: Upload the 'mlruns' directory as a workflow artifact
+      # This allows us to download the results after the workflow is complete.
+      - name: Upload MLflow results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-runs # The name of the downloadable zip file
+          path: mlruns/     # The folder to upload
