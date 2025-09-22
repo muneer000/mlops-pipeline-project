@@ -1,0 +1,10 @@
+artifact_location: file:///home/runner/work/mlops-pipeline-project/mlops-pipeline-project/mlruns/0/models/m-432c556049da4f08a3b7df593a753d96/artifacts
+creation_timestamp: 1758364543869
+experiment_id: '0'
+last_updated_timestamp: 1758364545642
+model_id: m-432c556049da4f08a3b7df593a753d96
+model_type: null
+name: iris-random-forest-model
+source_run_id: c43562bdd03f43029b69ec3b21564300
+status: 2
+status_message: null
