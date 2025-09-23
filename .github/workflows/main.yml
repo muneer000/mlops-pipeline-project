@@ -1,33 +1,32 @@
-# main.yml (FINAL VERSION - with Continuous Deployment)
+# main.yml (FINAL VERSION - with Deployment to Hugging Face Spaces)
 
-name: Python CI/CD Pipeline
+name: Python CI/CD Pipeline to Hugging Face
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      # Step 1: Log in to Docker Hub
-      - name: Log in to Docker Hub
+      # 2. Log in to Hugging Face Docker Registry
+      - name: Log in to Hugging Face Docker Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: hf.co
+          username: ${{ secrets.HF_USERNAME }}
+          password: ${{ secrets.HF_TOKEN }}
 
-      # Step 2: Build the Docker image AND push it to Docker Hub
-      # We tag the image with our Docker Hub username.
-      - name: Build and push Docker image
+      # 3. Build the Docker image AND push it to Hugging Face
+      - name: Build and push Docker image to Hugging Face
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/iris-predictor:latest
+          # The tag must follow this format: hf.co/{your_hf_username}/{your_space_name}:latest
+          tags: hf.co/${{ secrets.HF_USERNAME }}/iris-predictor-app:latest
