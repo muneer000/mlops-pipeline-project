@@ -1,4 +1,4 @@
-# main.yml (FINAL VERSION - with Deployment to Hugging Face Spaces)
+# main.yml (FINAL VERSION - Using Environment Variables for Auth)
 
 name: Python CI/CD Pipeline to Hugging Face
 
@@ -9,25 +9,27 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
+    # NEW PART: Define environment variables for the entire job
+    env:
+      HF_USERNAME: ${{ secrets.HF_USERNAME }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      SPACE_NAME: iris-predictor-app # Your Hugging Face Space name
+
     steps:
       # 1. Checkout the repository code
-      
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # 2. Log in to Hugging Face Docker Registry
+      # We are now using an environment variable and stdin pipe for the password
       - name: Log in to Hugging Face Docker Registry
-        uses: docker/login-action@v3
-        with:
-          registry: hf.co
-          username: ${{ secrets.HF_USERNAME }}
-          password: ${{ secrets.HF_TOKEN }}
+        run: echo $HF_TOKEN | docker login -u $HF_USERNAME --password-stdin hf.co
 
-      # 3. Build the Docker image AND push it to Hugging Face
+      # 3. Build and push Docker image to Hugging Face
       - name: Build and push Docker image to Hugging Face
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # The tag must follow this format: hf.co/{your_hf_username}/{your_space_name}:latest
-          tags: hf.co/${{ secrets.HF_USERNAME }}/iris-predictor-app:latest
+          tags: hf.co/$HF_USERNAME/$SPACE_NAME:latest
